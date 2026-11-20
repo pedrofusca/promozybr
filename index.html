@@ -228,6 +228,8 @@ $('openAdmin').onclick = async () => {
   if (!adminError && admin) {
     $('adminLogin').hidden = true;
     $('adminSettings').hidden = false;
+ $('adminStats').hidden = false;
+await loadClickStats();
   }
 };
 
