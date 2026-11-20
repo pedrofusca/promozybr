@@ -247,6 +247,7 @@ loadMetaPixel(META_PIXEL_ID);
 
     $(elementId).textContent = count ?? 0;
   }
+   } 
     async function loadVisitStats() {
   const now = new Date();
 
@@ -280,7 +281,7 @@ loadMetaPixel(META_PIXEL_ID);
     $(elementId).textContent = count ?? 0;
   }
 }
-}
+
     $('joinButton').addEventListener('click', e => {
     const cfg = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
     if (!cfg.whatsapp) cfg.whatsapp = DEFAULT_WHATSAPP;
