@@ -77,6 +77,18 @@
 <div class="modal" id="adminModal" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
   <div class="dialog">
     <div class="dialog-head"><h2 id="adminTitle">Configurações do site</h2><button class="close" id="closeAdmin" aria-label="Fechar">×</button></div>
+    <div id="adminLogin">
+  <h3>Login do administrador</h3>
+  <input type="email" id="adminEmail"
+    placeholder="E-mail do administrador">
+  <input type="password" id="adminPassword"
+    placeholder="Senha">
+  <button type="button" id="loginAdmin">
+    ENTRAR
+  </button>
+  <p id="loginStatus"></p>
+</div>
+    <div id="adminSettings" hidden>
     <label for="waLink">Link do grupo do WhatsApp</label><input id="waLink" type="url" placeholder="https://chat.whatsapp.com/...">
     <label for="pixelId">ID do Pixel da Meta (opcional)</label><input id="pixelId" inputmode="numeric" placeholder="Ex.: 123456789012345">
     <button class="cta save" id="saveSettings" type="button">SALVAR CONFIGURAÇÕES</button>
@@ -127,28 +139,67 @@ const supabaseClient = window.supabase.createClient(
   });
   
 $('openAdmin').onclick = async () => {
-  const { data: { user }, error } = await supabaseClient.auth.getUser();
-
-  if (error || !user) {
-    alert('Você precisa fazer login como administrador.');
-    return;
-  }
-
-  const { data: admin, error: adminError } = await supabaseClient
-    .from('admin_users')
-    .select('user_id')
-    .eq('user_id', user.id)
-    .maybeSingle();
-
-  if (adminError || !admin) {
-    alert('Acesso negado. Você não é administrador.');
-    return;
-  }
+  $('adminSettings').hidden = true;
+  $('adminLogin').hidden = false;
 
   $('adminModal').classList.add('open');
+
+  const { data: { user }, error } =
+    await supabaseClient.auth.getUser();
+
+  if (error || !user) return;
+
+  const { data: admin, error: adminError } =
+    await supabaseClient
+      .from('admin_users')
+      .select('user_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+  if (!adminError && admin) {
+    $('adminLogin').hidden = true;
+    $('adminSettings').hidden = false;
+  }
 };
 
-  $('closeAdmin').onclick = () => $('adminModal').classList.remove('open');
+  $('loginAdmin').onclick = async () => {
+  const email = $('adminEmail').value.trim();
+  const password = $('adminPassword').value;
+
+  $('loginStatus').textContent = 'Verificando acesso...';
+
+  const { data, error } =
+    await supabaseClient.auth.signInWithPassword({
+      email,
+      password
+    });
+
+  if (error) {
+    $('loginStatus').textContent =
+      'E-mail ou senha incorretos.';
+    return;
+  }
+
+  const { data: admin, error: adminError } =
+    await supabaseClient
+      .from('admin_users')
+      .select('user_id')
+      .eq('user_id', data.user.id)
+      .maybeSingle();
+
+  if (adminError || !admin) {
+    await supabaseClient.auth.signOut();
+    $('loginStatus').textContent =
+      'Acesso negado. Você não é administrador.';
+    return;
+  }
+
+  $('adminLogin').hidden = true;
+  $('adminSettings').hidden = false;
+  $('adminPassword').value = '';
+  $('loginStatus').textContent = '';
+};
+    $('closeAdmin').onclick = () => $('adminModal').classList.remove('open');
   $('adminModal').addEventListener('click', e => { if(e.target === $('adminModal')) $('adminModal').classList.remove('open'); });
   $('saveSettings').onclick = () => {
     const whatsapp = $('waLink').value.trim(), pixelId = $('pixelId').value.trim();
