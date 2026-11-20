@@ -133,6 +133,13 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
+    // Registrar visitas ao site
+supabaseClient.rpc('register_site_visit')
+  .then(({ error }) => {
+    if (error) {
+      console.error('Erro ao registrar visita:', error);
+    }
+  });
 
   const $ = id => document.getElementById(id);
   const STORAGE_KEY = 'promozybr_site_settings_v1';
