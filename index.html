@@ -92,6 +92,14 @@
     <label for="waLink">Link do grupo do WhatsApp</label><input id="waLink" type="url" placeholder="https://chat.whatsapp.com/...">
     <label for="pixelId">ID do Pixel da Meta (opcional)</label><input id="pixelId" inputmode="numeric" placeholder="Ex.: 123456789012345">
     <button class="cta save" id="saveSettings" type="button">SALVAR CONFIGURAÇÕES</button>
+      <section id="adminStats" hidden>
+  <h3>Estatísticas do grupo</h3>
+  <p>Cliques para entrar no WhatsApp</p>
+
+  <div>Hoje: <strong id="clicksToday">0</strong></div>
+  <div>Últimos 7 dias: <strong id="clicks7Days">0</strong></div>
+  <div>Últimos 360 dias: <strong id="clicks360Days">0</strong></div>
+</section>
     <div class="status" id="status"></div>
     <p class="note">Protótipo: estas configurações ficam salvas somente neste navegador. Antes de publicar, o painel deve ser protegido com login e as configurações devem ficar em um servidor. O Pixel só deve ser ativado após configurar o aviso/consentimento de cookies aplicável ao seu público.</p>
   </div>
@@ -154,13 +162,49 @@ loadMetaPixel(META_PIXEL_ID);
     (window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
     fbq('init', id); fbq('track', 'PageView');
   }
-  $('joinButton').addEventListener('click', e => {
+  async function loadClickStats() {
+  const now = new Date();
+
+  const today = new Date(now);
+  today.setHours(0, 0, 0, 0);
+
+  const sevenDays = new Date(now);
+  sevenDays.setDate(sevenDays.getDate() - 7);
+
+  const threeSixtyDays = new Date(now);
+  threeSixtyDays.setDate(threeSixtyDays.getDate() - 360);
+
+  const periods = [
+    ['clicksToday', today],
+    ['clicks7Days', sevenDays],
+    ['clicks360Days', threeSixtyDays]
+  ];
+
+  for (const [elementId, startDate] of periods) {
+    const { count, error } = await supabaseClient
+      .from('group_clicks')
+      .select('id', { count: 'exact', head: true })
+      .gte('created_at', startDate.toISOString());
+
+    if (error) {
+      console.error('Erro ao consultar cliques:', error);
+      $(elementId).textContent = 'Erro';
+      continue;
+    }
+
+    $(elementId).textContent = count ?? 0;
+  }
+}
+    $('joinButton').addEventListener('click', e => {
     const cfg = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
     if (!cfg.whatsapp) cfg.whatsapp = DEFAULT_WHATSAPP;
     if (!cfg.whatsapp) { e.preventDefault(); alert('O link do grupo ainda não foi configurado.'); return; }
     if (typeof fbq === 'function') {
   fbq('trackCustom', 'WhatsAppGroupClick');
 }
+    supabaseClient.rpc('register_group_click').then(({ error }) => {
+  if (error) console.error('Erro ao registrar clique:', error);
+});
   });
   
 $('openAdmin').onclick = async () => {
@@ -221,6 +265,8 @@ $('openAdmin').onclick = async () => {
 
   $('adminLogin').hidden = true;
   $('adminSettings').hidden = false;
+    $('adminStats').hidden = false;
+    await loadClickStats();
   $('adminPassword').value = '';
   $('loginStatus').textContent = '';
 };
