@@ -92,14 +92,34 @@
     <label for="waLink">Link do grupo do WhatsApp</label><input id="waLink" type="url" placeholder="https://chat.whatsapp.com/...">
     <label for="pixelId">ID do Pixel da Meta (opcional)</label><input id="pixelId" inputmode="numeric" placeholder="Ex.: 123456789012345">
     <button class="cta save" id="saveSettings" type="button">SALVAR CONFIGURAÇÕES</button>
-      <section id="adminStats" hidden>
+     
+<section id="adminStats" hidden>
   <h3>Estatísticas do grupo</h3>
-  <p>Cliques para entrar no WhatsApp</p>
+  <p>Cliques no botão para entrar no WhatsApp</p>
 
-  <div>Hoje: <strong id="clicksToday">0</strong></div>
-  <div>Últimos 7 dias: <strong id="clicks7Days">0</strong></div>
-  <div>Últimos 360 dias: <strong id="clicks360Days">0</strong></div>
+  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:20px;">
+
+    <div style="background:#202020;border:1px solid #383838;border-radius:12px;padding:15px;min-width:0;">
+      <div style="color:#aaa;font-size:12px;">HOJE</div>
+      <strong id="clicksToday" style="display:block;font-size:30px;color:white;margin-top:10px;">0</strong>
+      <small style="color:#999;">Cliques</small>
+    </div>
+
+    <div style="background:#202020;border:1px solid #383838;border-radius:12px;padding:15px;min-width:0;">
+      <div style="color:#aaa;font-size:12px;">7 DIAS</div>
+      <strong id="clicks7Days" style="display:block;font-size:30px;color:white;margin-top:10px;">0</strong>
+      <small style="color:#999;">Cliques</small>
+    </div>
+
+    <div style="background:#202020;border:1px solid #383838;border-radius:12px;padding:15px;min-width:0;">
+      <div style="color:#aaa;font-size:12px;">360 DIAS</div>
+      <strong id="clicks360Days" style="display:block;font-size:30px;color:white;margin-top:10px;">0</strong>
+      <small style="color:#999;">Cliques</small>
+    </div>
+
+  </div>
 </section>
+
     <div class="status" id="status"></div>
     <p class="note">Protótipo: estas configurações ficam salvas somente neste navegador. Antes de publicar, o painel deve ser protegido com login e as configurações devem ficar em um servidor. O Pixel só deve ser ativado após configurar o aviso/consentimento de cookies aplicável ao seu público.</p>
   </div>
