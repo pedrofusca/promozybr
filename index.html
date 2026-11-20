@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#090909">
+  <title>PROMOZYBR — As melhores promoções</title>
+  <meta name="description" content="Entre no grupo gratuito da PROMOZYBR e receba ofertas selecionadas todos os dias.">
+  <style>
+    :root{--bg:#090909;--panel:#121212;--line:#292929;--muted:#a5a5a5;--white:#f7f7f7;--soft:#d9d9d9}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--white);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+    a{color:inherit;text-decoration:none}.wrap{width:min(1080px,calc(100% - 40px));margin:auto}
+    header{height:76px;border-bottom:1px solid #1e1e1e;display:flex;align-items:center}
+    .nav{display:flex;align-items:center;justify-content:space-between}.brand{display:flex;align-items:center;gap:11px;font-weight:850;letter-spacing:2px;font-size:19px}
+    .mark{width:36px;height:36px;border:1px solid #555;border-radius:10px;display:grid;place-items:center;font-size:18px}
+    .nav small{color:var(--muted);font-size:12px;letter-spacing:.4px}
+    .hero{min-height:650px;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:55px;padding:76px 0}
+    .eyebrow{display:inline-flex;border:1px solid #333;border-radius:999px;padding:8px 13px;color:#c8c8c8;font-size:11px;letter-spacing:1.5px;text-transform:uppercase}
+    h1{font-size:clamp(42px,6vw,68px);line-height:1.02;letter-spacing:-3px;margin:22px 0 20px;font-weight:850}
+    h1 span{color:#9b9b9b}.lead{font-size:17px;line-height:1.7;color:#b8b8b8;max-width:490px;margin:0 0 28px}
+    .cta{display:inline-flex;align-items:center;justify-content:center;gap:10px;background:#f4f4f4;color:#090909;padding:17px 23px;border-radius:10px;font-weight:800;font-size:14px;transition:.2s;border:0;cursor:pointer}
+    .cta:hover{background:#d7d7d7;transform:translateY(-2px)}.hint{display:block;color:#777;font-size:12px;margin-top:14px}
+    .visual{border:1px solid #292929;border-radius:22px;background:linear-gradient(145deg,#171717,#0d0d0d);padding:30px;min-height:390px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+    .visual:before{content:"";position:absolute;width:280px;height:280px;border:1px solid #303030;border-radius:50%;right:-70px;top:-80px;box-shadow:0 0 0 35px #ffffff05,0 0 0 70px #ffffff03}
+    .visual-top,.visual-bottom{position:relative;z-index:1}.visual-top{display:flex;justify-content:space-between;color:#aaa;font-size:11px;letter-spacing:1.2px}
+    .bag{height:190px;display:grid;place-items:center;position:relative;z-index:1}
+    .bag-icon{width:142px;height:142px;border:1px solid #777;border-radius:25px;display:grid;place-items:center;font-size:66px;transform:rotate(-7deg);background:linear-gradient(145deg,#222,#101010);box-shadow:20px 20px 60px #000}
+    .visual-bottom strong{font-size:23px;display:block;letter-spacing:-.5px}.visual-bottom small{color:#999;display:block;margin-top:7px}
+    .trust{border-top:1px solid #242424;border-bottom:1px solid #242424;padding:25px 0;display:flex;justify-content:center;gap:48px;flex-wrap:wrap;color:#aaa;font-size:12px;letter-spacing:.5px}
+    .trust span{display:flex;align-items:center;gap:9px}.dot{width:5px;height:5px;background:#aaa;border-radius:50%}
+    .section{padding:90px 0;text-align:center}.section h2{font-size:32px;letter-spacing:-1px;margin:0 0 12px}.section p{color:#999;line-height:1.6;margin:0}
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:36px;text-align:left}
+    .step{border:1px solid #292929;border-radius:14px;padding:23px;background:#101010}.num{color:#777;font-size:11px;letter-spacing:1px}.step h3{font-size:16px;margin:18px 0 8px}.step p{font-size:13px;color:#999}
+    footer{border-top:1px solid #222;padding:26px 0;color:#777;font-size:12px}.foot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+    .admin-trigger{position:fixed;right:18px;bottom:18px;border:1px solid #444;background:#151515;color:#aaa;border-radius:9px;padding:10px 13px;font-size:11px;cursor:pointer}
+    .modal{display:none;position:fixed;inset:0;background:#000c;z-index:10;align-items:center;justify-content:center;padding:20px}.modal.open{display:flex}
+    .dialog{width:min(520px,100%);max-height:90vh;overflow:auto;background:#111;border:1px solid #333;border-radius:16px;padding:24px}
+    .dialog-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.dialog h2{font-size:20px;margin:0}.close{background:none;color:#aaa;border:0;font-size:24px;cursor:pointer}
+    label{display:block;color:#bbb;font-size:12px;margin:15px 0 7px}input{width:100%;padding:13px;border:1px solid #363636;border-radius:8px;background:#090909;color:#fff;outline:none}input:focus{border-color:#888}
+    .save{width:100%;margin-top:20px}.note{font-size:11px;color:#888;line-height:1.5;margin-top:14px}.status{color:#aaa;font-size:12px;margin-top:12px;min-height:18px}
+    @media(max-width:760px){.hero{grid-template-columns:1fr;gap:35px;padding:58px 0}.visual{min-height:310px}.bag{height:130px}.bag-icon{width:112px;height:112px;font-size:52px}.trust{gap:18px}.steps{grid-template-columns:1fr}.section{padding:65px 0}h1{letter-spacing:-2px}.nav small{display:none}}
+  </style>
+  <!-- O Pixel da Meta será carregado dinamicamente quando um ID for salvo no painel. -->
+</head>
+<body>
+<header><div class="wrap nav">
+  <a class="brand" href="#" aria-label="PROMOZYBR início"><span class="mark">P</span><span>PROMOZYBR</span></a>
+  <small>OFERTAS SELECIONADAS • TODOS OS DIAS</small>
+</div></header>
+<main>
+  <section class="wrap hero">
+    <div>
+      <span class="eyebrow">Seu grupo de ofertas</span>
+      <h1>COMPRE BEM.<br><span>PAGUE MENOS.</span></h1>
+      <p class="lead">As melhores promoções da internet, selecionadas para você. Entre gratuitamente no grupo da PROMOZYBR e não perca boas oportunidades.</p>
+      <a class="cta" id="joinButton" href="#" target="_blank" rel="noopener">ENTRAR NO GRUPO <span aria-hidden="true">↗</span></a>
+      <small class="hint">Gratuito • Ofertas atualizadas • Saia quando quiser</small>
+    </div>
+    <div class="visual" aria-label="Identidade visual PROMOZYBR">
+      <div class="visual-top"><span>PROMOZYBR / 001</span><span>ECONOMIA INTELIGENTE</span></div>
+      <div class="bag"><div class="bag-icon">🛍</div></div>
+      <div class="visual-bottom"><strong>Oportunidades que valem a pena.</strong><small>Amazon · Shopee · Mercado Livre e mais</small></div>
+    </div>
+  </section>
+  <div class="trust"><span><i class="dot"></i> 100% GRATUITO</span><span><i class="dot"></i> OFERTAS SELECIONADAS</span><span><i class="dot"></i> DIRETO NO WHATSAPP</span></div>
+  <section class="wrap section">
+    <h2>É simples participar.</h2><p>Em poucos segundos você começa a receber ofertas.</p>
+    <div class="steps">
+      <article class="step"><span class="num">PASSO 01</span><h3>Entre no grupo</h3><p>Toque no botão e acesse nosso grupo oficial no WhatsApp.</p></article>
+      <article class="step"><span class="num">PASSO 02</span><h3>Acompanhe as ofertas</h3><p>Veja oportunidades selecionadas em lojas conhecidas.</p></article>
+      <article class="step"><span class="num">PASSO 03</span><h3>Economize</h3><p>Aproveite os descontos enquanto estiverem disponíveis.</p></article>
+    </div>
+  </section>
+</main>
+<footer><div class="wrap foot"><span>© <span id="year"></span> PROMOZYBR. Todos os direitos reservados.</span><span>Ofertas sujeitas à disponibilidade das lojas.</span></div></footer>
+<button class="admin-trigger" id="openAdmin" type="button">⚙ Configurações</button>
+<div class="modal" id="adminModal" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
+  <div class="dialog">
+    <div class="dialog-head"><h2 id="adminTitle">Configurações do site</h2><button class="close" id="closeAdmin" aria-label="Fechar">×</button></div>
+    <label for="waLink">Link do grupo do WhatsApp</label><input id="waLink" type="url" placeholder="https://chat.whatsapp.com/...">
+    <label for="pixelId">ID do Pixel da Meta (opcional)</label><input id="pixelId" inputmode="numeric" placeholder="Ex.: 123456789012345">
+    <button class="cta save" id="saveSettings" type="button">SALVAR CONFIGURAÇÕES</button>
+    <div class="status" id="status"></div>
+    <p class="note">Protótipo: estas configurações ficam salvas somente neste navegador. Antes de publicar, o painel deve ser protegido com login e as configurações devem ficar em um servidor. O Pixel só deve ser ativado após configurar o aviso/consentimento de cookies aplicável ao seu público.</p>
+  </div>
+</div>
+<script>
+  const $ = id => document.getElementById(id);
+  const STORAGE_KEY = 'promozybr_site_settings_v1';
+  const DEFAULT_WHATSAPP = 'https://chat.whatsapp.com/IC8M06CcaeU4uCbCstQypv';
+  let pixelLoaded = '';
+  function loadSettings(){
+    let cfg = {};
+    try { cfg = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
+    if (!cfg.whatsapp) cfg.whatsapp = DEFAULT_WHATSAPP;
+    $('waLink').value = cfg.whatsapp || '';
+    $('pixelId').value = cfg.pixelId || '';
+    $('joinButton').href = cfg.whatsapp || '#';
+    $('joinButton').setAttribute('aria-disabled', cfg.whatsapp ? 'false' : 'true');
+    if (cfg.pixelId && /^\d+$/.test(cfg.pixelId)) loadMetaPixel(cfg.pixelId);
+  }
+  function loadMetaPixel(id){
+    if (pixelLoaded === id) return;
+    if (pixelLoaded) return; // evita carregar mais de um Pixel na mesma página
+    pixelLoaded = id;
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}
+    (window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', id); fbq('track', 'PageView');
+  }
+  $('joinButton').addEventListener('click', e => {
+    const cfg = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    if (!cfg.whatsapp) cfg.whatsapp = DEFAULT_WHATSAPP;
+    if (!cfg.whatsapp) { e.preventDefault(); alert('O link do grupo ainda não foi configurado.'); return; }
+    if (typeof fbq === 'function') fbq('trackCustom', 'WhatsAppGroupClick');
+  });
+  $('openAdmin').onclick = () => $('adminModal').classList.add('open');
+  $('closeAdmin').onclick = () => $('adminModal').classList.remove('open');
+  $('adminModal').addEventListener('click', e => { if(e.target === $('adminModal')) $('adminModal').classList.remove('open'); });
+  $('saveSettings').onclick = () => {
+    const whatsapp = $('waLink').value.trim(), pixelId = $('pixelId').value.trim();
+    if (whatsapp && !/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]+/i.test(whatsapp)) {
+      $('status').textContent = 'Informe um link válido de convite do WhatsApp (chat.whatsapp.com).'; return;
+    }
+    if (pixelId && !/^\d+$/.test(pixelId)) { $('status').textContent = 'O ID do Pixel deve conter apenas números.'; return; }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({whatsapp, pixelId}));
+    $('joinButton').href = whatsapp || '#';
+    $('status').textContent = 'Configurações salvas neste navegador.';
+    if (pixelId) loadMetaPixel(pixelId);
+  };
+  $('year').textContent = new Date().getFullYear();
+  loadSettings();
+</script>
+</body>
+</html>
