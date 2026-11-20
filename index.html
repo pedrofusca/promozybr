@@ -125,7 +125,29 @@ const supabaseClient = window.supabase.createClient(
     if (!cfg.whatsapp) { e.preventDefault(); alert('O link do grupo ainda não foi configurado.'); return; }
     if (typeof fbq === 'function') fbq('trackCustom', 'WhatsAppGroupClick');
   });
-  $('openAdmin').onclick = () => $('adminModal').classList.add('open');
+  
+$('openAdmin').onclick = async () => {
+  const { data: { user }, error } = await supabaseClient.auth.getUser();
+
+  if (error || !user) {
+    alert('Você precisa fazer login como administrador.');
+    return;
+  }
+
+  const { data: admin, error: adminError } = await supabaseClient
+    .from('admin_users')
+    .select('user_id')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  if (adminError || !admin) {
+    alert('Acesso negado. Você não é administrador.');
+    return;
+  }
+
+  $('adminModal').classList.add('open');
+};
+
   $('closeAdmin').onclick = () => $('adminModal').classList.remove('open');
   $('adminModal').addEventListener('click', e => { if(e.target === $('adminModal')) $('adminModal').classList.remove('open'); });
   $('saveSettings').onclick = () => {
