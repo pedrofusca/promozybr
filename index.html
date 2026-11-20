@@ -110,6 +110,8 @@ const supabaseClient = window.supabase.createClient(
   const STORAGE_KEY = 'promozybr_site_settings_v1';
   const DEFAULT_WHATSAPP = 'https://chat.whatsapp.com/IC8M06CcaeU4uCbCstQypv';
   let pixelLoaded = '';
+    
+const META_PIXEL_ID = '1813167259790889';
  
 async function loadSettings() {
   const { data, error } = await supabaseClient
@@ -136,9 +138,9 @@ async function loadSettings() {
     cfg.whatsapp ? 'false' : 'true'
   );
 
-  if (cfg.pixelId && /^\d+$/.test(cfg.pixelId)) {
-    loadMetaPixel(cfg.pixelId);
-  }
+ 
+loadMetaPixel(META_PIXEL_ID);
+  
 }
 
   function loadMetaPixel(id){
@@ -156,7 +158,9 @@ async function loadSettings() {
     const cfg = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
     if (!cfg.whatsapp) cfg.whatsapp = DEFAULT_WHATSAPP;
     if (!cfg.whatsapp) { e.preventDefault(); alert('O link do grupo ainda não foi configurado.'); return; }
-    if (typeof fbq === 'function') fbq('trackCustom', 'WhatsAppGroupClick');
+    if (typeof fbq === 'function') {
+  fbq('trackCustom', 'WhatsAppGroupClick');
+}
   });
   
 $('openAdmin').onclick = async () => {
@@ -274,7 +278,8 @@ $('saveSettings').onclick = async () => {
 };
 
   $('year').textContent = new Date().getFullYear();
-  loadSettings();
+    loadMetaPixel(META_PIXEL_ID);
+    loadSettings();
 </script>
 </body>
 </html>
