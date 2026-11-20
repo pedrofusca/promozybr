@@ -110,16 +110,37 @@ const supabaseClient = window.supabase.createClient(
   const STORAGE_KEY = 'promozybr_site_settings_v1';
   const DEFAULT_WHATSAPP = 'https://chat.whatsapp.com/IC8M06CcaeU4uCbCstQypv';
   let pixelLoaded = '';
-  function loadSettings(){
-    let cfg = {};
-    try { cfg = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) {}
-    if (!cfg.whatsapp) cfg.whatsapp = DEFAULT_WHATSAPP;
-    $('waLink').value = cfg.whatsapp || '';
-    $('pixelId').value = cfg.pixelId || '';
-    $('joinButton').href = cfg.whatsapp || '#';
-    $('joinButton').setAttribute('aria-disabled', cfg.whatsapp ? 'false' : 'true');
-    if (cfg.pixelId && /^\d+$/.test(cfg.pixelId)) loadMetaPixel(cfg.pixelId);
+ 
+async function loadSettings() {
+  const { data, error } = await supabaseClient
+    .from('site_settings')
+    .select('whatsapp, pixel_id')
+    .eq('id', 1)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Erro ao carregar configurações:', error);
+    return;
   }
+
+  const cfg = {
+    whatsapp: data?.whatsapp || DEFAULT_WHATSAPP,
+    pixelId: data?.pixel_id || ''
+  };
+
+  $('waLink').value = cfg.whatsapp;
+  $('pixelId').value = cfg.pixelId;
+  $('joinButton').href = cfg.whatsapp || '#';
+  $('joinButton').setAttribute(
+    'aria-disabled',
+    cfg.whatsapp ? 'false' : 'true'
+  );
+
+  if (cfg.pixelId && /^\d+$/.test(cfg.pixelId)) {
+    loadMetaPixel(cfg.pixelId);
+  }
+}
+
   function loadMetaPixel(id){
     if (pixelLoaded === id) return;
     if (pixelLoaded) return; // evita carregar mais de um Pixel na mesma página
@@ -201,17 +222,57 @@ $('openAdmin').onclick = async () => {
 };
     $('closeAdmin').onclick = () => $('adminModal').classList.remove('open');
   $('adminModal').addEventListener('click', e => { if(e.target === $('adminModal')) $('adminModal').classList.remove('open'); });
-  $('saveSettings').onclick = () => {
-    const whatsapp = $('waLink').value.trim(), pixelId = $('pixelId').value.trim();
-    if (whatsapp && !/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]+/i.test(whatsapp)) {
-      $('status').textContent = 'Informe um link válido de convite do WhatsApp (chat.whatsapp.com).'; return;
-    }
-    if (pixelId && !/^\d+$/.test(pixelId)) { $('status').textContent = 'O ID do Pixel deve conter apenas números.'; return; }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({whatsapp, pixelId}));
-    $('joinButton').href = whatsapp || '#';
-    $('status').textContent = 'Configurações salvas neste navegador.';
-    if (pixelId) loadMetaPixel(pixelId);
-  };
+ 
+$('saveSettings').onclick = async () => {
+  const whatsapp = $('waLink').value.trim();
+  const pixelId = $('pixelId').value.trim();
+
+  if (whatsapp && !/^https:\/\/chat\.whatsapp\.com\/[A-Za-z0-9]+\/?$/.test(whatsapp)) {
+    $('status').textContent = 'Informe um link válido do WhatsApp.';
+    return;
+  }
+
+  if (pixelId && !/^\d+$/.test(pixelId)) {
+    $('status').textContent = 'O ID do Pixel deve conter apenas números.';
+    return;
+  }
+
+  const { data: { user }, error: authError } =
+    await supabaseClient.auth.getUser();
+
+  if (authError || !user) {
+    $('status').textContent = 'Faça login como administrador.';
+    return;
+  }
+
+  const { data: admin, error: adminError } = await supabaseClient
+    .from('admin_users')
+    .select('user_id')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  if (adminError || !admin) {
+    $('status').textContent = 'Acesso negado.';
+    return;
+  }
+
+  const { error } = await supabaseClient
+    .from('site_settings')
+    .update({
+      whatsapp: whatsapp,
+      pixel_id: pixelId || null
+    })
+    .eq('id', 1);
+
+  if (error) {
+    $('status').textContent = 'Erro ao salvar: ' + error.message;
+    return;
+  }
+
+  $('status').textContent = 'Configurações salvas com sucesso!';
+  await loadSettings();
+};
+
   $('year').textContent = new Date().getFullYear();
   loadSettings();
 </script>
