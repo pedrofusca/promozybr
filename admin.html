@@ -102,6 +102,25 @@
         <div class="numero" id="visitas">—</div>
         <p>Registros de cliques no grupo</p>
         <div class="numero" id="cliques">—</div>
+        
+<hr>
+<h3>Visitas por período</h3>
+<p>Hoje</p>
+<div class="numero" id="visitsToday">0</div>
+<p>Últimos 7 dias</p>
+<div class="numero" id="visits7Days">0</div>
+<p>Últimos 360 dias</p>
+<div class="numero" id="visits360Days">0</div>
+
+<hr>
+<h3>Cliques no grupo por período</h3>
+<p>Hoje</p>
+<div class="numero" id="clicksToday">0</div>
+<p>Últimos 7 dias</p>
+<div class="numero" id="clicks7Days">0</div>
+<p>Últimos 360 dias</p>
+<div class="numero" id="clicks360Days">0</div>
+
         <button id="atualizar" class="secondary">
           ATUALIZAR CONTADORES
         </button>
@@ -219,7 +238,42 @@
       resultadoCliques.error
         ? 'Indisponível'
         : resultadoCliques.count ?? 0;
-  }
+  
+  
+    // Estatísticas por período
+    const agora = new Date();
+    const inicioHoje = new Date(agora);
+    inicioHoje.setHours(0, 0, 0, 0);
+
+    const inicio7Dias = new Date(inicioHoje);
+    inicio7Dias.setDate(inicio7Dias.getDate() - 6);
+
+    const inicio360Dias = new Date(inicioHoje);
+    inicio360Dias.setDate(inicio360Dias.getDate() - 359);
+
+    const periodos = [
+      ['Today', inicioHoje],
+      ['7Days', inicio7Dias],
+      ['360Days', inicio360Dias]
+    ];
+
+    for (const [periodo, inicio] of periodos) {
+      const [visitas, cliques] = await Promise.all([
+        db.from('site_visits')
+          .select('id', { count: 'exact', head: true })
+          .gte('created_at', inicio.toISOString()),
+        db.from('group_clicks')
+          .select('id', { count: 'exact', head: true })
+          .gte('created_at', inicio.toISOString())
+      ]);
+
+      document.getElementById('visits' + periodo).textContent =
+        visitas.error ? 'Erro' : visitas.count ?? 0;
+
+      document.getElementById('clicks' + periodo).textContent =
+        cliques.error ? 'Erro' : cliques.count ?? 0;
+    }
+}
 
   login.addEventListener('submit', async (evento) => {
     evento.preventDefault();
