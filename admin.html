@@ -75,7 +75,10 @@
     </form>
 
     <section id="areaAdmin" hidden>
-      <h2>Painel de controle</h2>
+      <details id="painelControle" open>
+  <summary style="cursor:pointer; font-size:20px; font-weight:bold; padding:10px 0;">
+    Painel de controle
+  </summary>
       <p>Acesso administrativo autorizado.</p>
 
       <form id="configForm">
@@ -95,9 +98,13 @@
           SALVAR CONFIGURAÇÕES
         </button>
       </form>
+        </details>
 
       <div class="card" style="margin-top:20px">
-        <h2>Estatísticas</h2>
+       <details id="painelEstatisticas" open>
+  <summary style="cursor:pointer; font-size:20px; font-weight:bold; padding:10px 0;">
+    Estatísticas
+  </summary>
         <p>Registros de visitas</p>
         <div class="numero" id="visitas">—</div>
         <p>Registros de cliques no grupo</p>
@@ -125,7 +132,7 @@
           ATUALIZAR CONTADORES
         </button>
       </div>
-
+</details>
       <button id="sair" class="secondary">SAIR</button>
     </section>
 
