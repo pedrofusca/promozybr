@@ -10,27 +10,27 @@
     body {
       margin: 0;
       min-height: 100vh;
-      display: grid;
-      place-items: center;
       background: #090909;
       color: white;
       font-family: Arial, sans-serif;
-      padding: 20px;
+      padding: 35px 16px;
     }
-    .painel {
-      width: 100%;
-      max-width: 400px;
-      padding: 32px;
+    main { max-width: 550px; margin: auto; }
+    .card {
       background: #171717;
       border: 1px solid #333;
       border-radius: 16px;
+      padding: 25px;
+      margin-bottom: 18px;
     }
     h1 { margin-top: 0; }
-    p { color: #aaa; }
+    h2 { font-size: 19px; }
+    p, label { color: #aaa; }
+    label { display: block; margin-top: 15px; }
     input, button {
       width: 100%;
       padding: 14px;
-      margin-top: 12px;
+      margin-top: 10px;
       border-radius: 8px;
       font-size: 15px;
     }
@@ -41,116 +41,304 @@
     }
     button {
       background: white;
-      border: none;
       color: black;
+      border: none;
       font-weight: bold;
       cursor: pointer;
     }
     button:disabled { opacity: .5; }
+    .secondary {
+      background: #303030;
+      color: white;
+    }
+    .numero {
+      font-size: 34px;
+      font-weight: bold;
+      margin: 10px 0;
+    }
     #mensagem { font-size: 14px; }
     [hidden] { display: none !important; }
   </style>
 </head>
 <body>
-  <main class="painel">
+<main>
+  <div class="card">
     <h1>PROMOZYBR</h1>
     <p>Painel administrativo</p>
 
     <form id="login">
       <input id="email" type="email"
-             placeholder="E-mail" required>
+        placeholder="E-mail" required>
       <input id="senha" type="password"
-             placeholder="Senha" required>
+        placeholder="Senha" required>
       <button id="entrar" type="submit">ENTRAR</button>
     </form>
 
     <section id="areaAdmin" hidden>
-      <h2>Acesso autorizado</h2>
-      <p>Login administrativo realizado com sucesso.</p>
-      <button id="sair">SAIR</button>
+      <h2>Painel de controle</h2>
+      <p>Acesso administrativo autorizado.</p>
+
+      <form id="configForm">
+        <label for="whatsapp">Link do grupo WhatsApp</label>
+        <input id="whatsapp" type="url"
+          placeholder="https://chat.whatsapp.com/..."
+          required>
+
+        <label for="pixel">ID do Pixel Meta</label>
+        <input id="pixel" type="text"
+          inputmode="numeric"
+          pattern="[0-9]+"
+          placeholder="ID do Pixel"
+          required>
+
+        <button id="salvar" type="submit">
+          SALVAR CONFIGURAÇÕES
+        </button>
+      </form>
+
+      <div class="card" style="margin-top:20px">
+        <h2>Estatísticas</h2>
+        <p>Registros de visitas</p>
+        <div class="numero" id="visitas">—</div>
+        <p>Registros de cliques no grupo</p>
+        <div class="numero" id="cliques">—</div>
+        <button id="atualizar" class="secondary">
+          ATUALIZAR CONTADORES
+        </button>
+      </div>
+
+      <button id="sair" class="secondary">SAIR</button>
     </section>
 
     <p id="mensagem" role="status"></p>
-  </main>
+  </div>
+</main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const SUPABASE_URL =
-      'https://zuxyxzbzudjqswponfxt.supabase.co';
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL =
+    'https://zuxyxzbzudjqswponfxt.supabase.co';
 
-    const SUPABASE_KEY =
-      'sb_publishable_fkLNLYc9IZvzVJzIlz2C_A_5comtcse';
+  const SUPABASE_KEY =
+    'sb_publishable_fkLNLYc9IZvzVJzIlz2C_A_5comtcse';
 
-    const db = window.supabase.createClient(
-      SUPABASE_URL,
-      SUPABASE_KEY
-    );
+  const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
-    const login = document.getElementById('login');
-    const areaAdmin = document.getElementById('areaAdmin');
-    const mensagem = document.getElementById('mensagem');
-    const entrar = document.getElementById('entrar');
+  const login = document.getElementById('login');
+  const areaAdmin = document.getElementById('areaAdmin');
+  const mensagem = document.getElementById('mensagem');
+  const entrar = document.getElementById('entrar');
+  const salvar = document.getElementById('salvar');
 
-    async function verificarAdmin() {
-      const { data: { user }, error } =
-        await db.auth.getUser();
+  let adminAutorizado = false;
 
-      if (error || !user) {
-        login.hidden = false;
-        areaAdmin.hidden = true;
-        return;
-      }
+  function mostrarMensagem(texto) {
+    mensagem.textContent = texto;
+  }
 
-      const { data, error: adminError } = await db
-        .from('admin_users')
-        .select('user_id')
-        .eq('user_id', user.id)
-        .maybeSingle();
+  function mostrarLogin() {
+    adminAutorizado = false;
+    login.hidden = false;
+    areaAdmin.hidden = true;
+  }
 
-      if (adminError || !data) {
-        await db.auth.signOut();
-        login.hidden = false;
-        areaAdmin.hidden = true;
-        mensagem.textContent = 'Acesso não autorizado.';
-        return;
-      }
+  async function verificarAdmin() {
+    const { data: { user }, error } =
+      await db.auth.getUser();
 
-      login.hidden = true;
-      areaAdmin.hidden = false;
-      mensagem.textContent = '';
+    if (error || !user) {
+      mostrarLogin();
+      return false;
     }
 
-    login.addEventListener('submit', async (evento) => {
+    const { data, error: adminError } = await db
+      .from('admin_users')
+      .select('user_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (adminError || !data) {
+      mostrarLogin();
+      mostrarMensagem('Acesso não autorizado.');
+      return false;
+    }
+
+    adminAutorizado = true;
+    login.hidden = true;
+    areaAdmin.hidden = false;
+    mostrarMensagem('');
+
+    await carregarConfiguracoes();
+    await carregarContadores();
+    return true;
+  }
+
+  async function carregarConfiguracoes() {
+    if (!adminAutorizado) return;
+
+    const { data, error } = await db
+      .from('site_settings')
+      .select('whatsapp,pixel_id')
+      .eq('id', 1)
+      .maybeSingle();
+
+    if (error || !data) {
+      mostrarMensagem(
+        'Não foi possível carregar as configurações.'
+      );
+      return;
+    }
+
+    document.getElementById('whatsapp').value =
+      data.whatsapp || '';
+
+    document.getElementById('pixel').value =
+      data.pixel_id || '';
+  }
+
+  async function carregarContadores() {
+    if (!adminAutorizado) return;
+
+    const [resultadoVisitas, resultadoCliques] =
+      await Promise.all([
+        db.from('site_visits')
+          .select('*', { count: 'exact', head: true }),
+        db.from('group_clicks')
+          .select('*', { count: 'exact', head: true })
+      ]);
+
+    document.getElementById('visitas').textContent =
+      resultadoVisitas.error
+        ? 'Indisponível'
+        : resultadoVisitas.count ?? 0;
+
+    document.getElementById('cliques').textContent =
+      resultadoCliques.error
+        ? 'Indisponível'
+        : resultadoCliques.count ?? 0;
+  }
+
+  login.addEventListener('submit', async (evento) => {
+    evento.preventDefault();
+    entrar.disabled = true;
+    mostrarMensagem('Verificando acesso...');
+
+    try {
+      const { error } = await db.auth.signInWithPassword({
+        email: document.getElementById('email').value,
+        password: document.getElementById('senha').value
+      });
+
+      if (error) {
+        mostrarMensagem('E-mail ou senha inválidos.');
+        return;
+      }
+
+      await verificarAdmin();
+    } catch (erro) {
+      mostrarMensagem('Erro de conexão.');
+    } finally {
+      entrar.disabled = false;
+    }
+  });
+
+  document.getElementById('configForm')
+    .addEventListener('submit', async (evento) => {
       evento.preventDefault();
-      entrar.disabled = true;
-      mensagem.textContent = 'Verificando acesso...';
+
+      if (!await verificarPermissao()) return;
+
+      salvar.disabled = true;
+      mostrarMensagem('Salvando configurações...');
+
+      const whatsapp =
+        document.getElementById('whatsapp').value.trim();
+
+      const pixel_id =
+        document.getElementById('pixel').value.trim();
 
       try {
-        const { error } = await db.auth.signInWithPassword({
-          email: document.getElementById('email').value,
-          password: document.getElementById('senha').value
-        });
+        const url = new URL(whatsapp);
 
-        if (error) {
-          mensagem.textContent = 'E-mail ou senha inválidos.';
+        if (
+          url.protocol !== 'https:' ||
+          url.hostname !== 'chat.whatsapp.com'
+        ) {
+          mostrarMensagem(
+            'Informe um link válido de grupo do WhatsApp.'
+          );
           return;
         }
 
-        await verificarAdmin();
+        if (!/^\d+$/.test(pixel_id)) {
+          mostrarMensagem('Informe um ID de Pixel válido.');
+          return;
+        }
+
+        const { data, error } = await db
+          .from('site_settings')
+          .update({ whatsapp, pixel_id })
+          .eq('id', 1)
+          .select('id');
+
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          mostrarMensagem(
+            'Alteração não autorizada ou registro não encontrado.'
+          );
+          return;
+        }
+
+        mostrarMensagem('Configurações salvas com sucesso!');
       } catch (erro) {
-        mensagem.textContent = 'Erro de conexão.';
+        mostrarMensagem(
+          'Erro ao salvar. Verifique as permissões do Supabase.'
+        );
       } finally {
-        entrar.disabled = false;
+        salvar.disabled = false;
       }
     });
 
-    document.getElementById('sair').onclick = async () => {
-      await db.auth.signOut();
-      login.hidden = false;
-      areaAdmin.hidden = true;
-    };
+  async function verificarPermissao() {
+    const { data: { user }, error } =
+      await db.auth.getUser();
 
-    verificarAdmin();
-  </script>
+    if (error || !user) {
+      mostrarLogin();
+      mostrarMensagem('Faça login novamente.');
+      return false;
+    }
+
+    const { data, error: adminError } = await db
+      .from('admin_users')
+      .select('user_id')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (adminError || !data) {
+      mostrarLogin();
+      mostrarMensagem('Acesso não autorizado.');
+      return false;
+    }
+
+    return true;
+  }
+
+  document.getElementById('atualizar')
+    .addEventListener('click', carregarContadores);
+
+  document.getElementById('sair')
+    .addEventListener('click', async () => {
+      await db.auth.signOut();
+      mostrarLogin();
+      mostrarMensagem('Sessão encerrada.');
+    });
+
+  verificarAdmin();
+</script>
 </body>
 </html>
