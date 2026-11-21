@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Admin | PROMOZYBR</title>
   <style>
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       min-height: 100vh;
@@ -14,23 +15,142 @@
       background: #090909;
       color: white;
       font-family: Arial, sans-serif;
+      padding: 20px;
     }
     .painel {
-      width: min(360px, 85%);
+      width: 100%;
+      max-width: 400px;
       padding: 32px;
       background: #171717;
       border: 1px solid #333;
       border-radius: 16px;
     }
-    h1 { font-size: 24px; }
+    h1 { margin-top: 0; }
     p { color: #aaa; }
+    input, button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 12px;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+    input {
+      background: #101010;
+      border: 1px solid #444;
+      color: white;
+    }
+    button {
+      background: white;
+      border: none;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:disabled { opacity: .5; }
+    #mensagem { font-size: 14px; }
+    [hidden] { display: none !important; }
   </style>
 </head>
 <body>
   <main class="painel">
     <h1>PROMOZYBR</h1>
     <p>Painel administrativo</p>
-    <p>Configuração de acesso em andamento.</p>
+
+    <form id="login">
+      <input id="email" type="email"
+             placeholder="E-mail" required>
+      <input id="senha" type="password"
+             placeholder="Senha" required>
+      <button id="entrar" type="submit">ENTRAR</button>
+    </form>
+
+    <section id="areaAdmin" hidden>
+      <h2>Acesso autorizado</h2>
+      <p>Login administrativo realizado com sucesso.</p>
+      <button id="sair">SAIR</button>
+    </section>
+
+    <p id="mensagem" role="status"></p>
   </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL =
+      'https://zuxyxzbzudjqswponfxt.supabase.co';
+
+    const SUPABASE_KEY =
+      'sb_publishable_fkLNLYc9IZvzVJzIlz2C_A_5comtcse';
+
+    const db = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+    const login = document.getElementById('login');
+    const areaAdmin = document.getElementById('areaAdmin');
+    const mensagem = document.getElementById('mensagem');
+    const entrar = document.getElementById('entrar');
+
+    async function verificarAdmin() {
+      const { data: { user }, error } =
+        await db.auth.getUser();
+
+      if (error || !user) {
+        login.hidden = false;
+        areaAdmin.hidden = true;
+        return;
+      }
+
+      const { data, error: adminError } = await db
+        .from('admin_users')
+        .select('user_id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (adminError || !data) {
+        await db.auth.signOut();
+        login.hidden = false;
+        areaAdmin.hidden = true;
+        mensagem.textContent = 'Acesso não autorizado.';
+        return;
+      }
+
+      login.hidden = true;
+      areaAdmin.hidden = false;
+      mensagem.textContent = '';
+    }
+
+    login.addEventListener('submit', async (evento) => {
+      evento.preventDefault();
+      entrar.disabled = true;
+      mensagem.textContent = 'Verificando acesso...';
+
+      try {
+        const { error } = await db.auth.signInWithPassword({
+          email: document.getElementById('email').value,
+          password: document.getElementById('senha').value
+        });
+
+        if (error) {
+          mensagem.textContent = 'E-mail ou senha inválidos.';
+          return;
+        }
+
+        await verificarAdmin();
+      } catch (erro) {
+        mensagem.textContent = 'Erro de conexão.';
+      } finally {
+        entrar.disabled = false;
+      }
+    });
+
+    document.getElementById('sair').onclick = async () => {
+      await db.auth.signOut();
+      login.hidden = false;
+      areaAdmin.hidden = true;
+    };
+
+    verificarAdmin();
+  </script>
 </body>
 </html>
