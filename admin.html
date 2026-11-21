@@ -128,6 +128,25 @@
 <p>Últimos 360 dias</p>
 <div class="numero" id="clicks360Days">0</div>
 
+<div id="cartaoCTR" style="background:#292929; padding:18px; border-radius:12px; margin:20px 0;">
+  <div style="display:flex; justify-content:space-between; align-items:center;">
+    <strong style="color:#d4d4d4;">Taxa de cliques (CTR)</strong>
+    <span style="color:#22c55e; font-size:24px;">↖</span>
+  </div>
+
+  <div id="valorCTR" style="font-size:32px; font-weight:bold; color:#22c55e; margin:12px 0;">
+    0,0%
+  </div>
+
+  <div style="background:#454545; height:8px; border-radius:10px; overflow:hidden;">
+    <div id="barraCTR" style="background:#22c55e; width:0%; height:100%; border-radius:10px;"></div>
+  </div>
+
+  <p id="descricaoCTR" style="color:#b8b8b8; font-size:13px; margin-top:12px;">
+    Calculando taxa de cliques...
+  </p>
+</div>
+
 <div id="graficoDesempenho" style="margin:24px 0;">
   <h3>Desempenho do site</h3>
   <p>Visitas e cliques no WhatsApp nos últimos 7 dias</p>
@@ -258,6 +277,31 @@
         : resultadoCliques.count ?? 0;
   
   
+  // Taxa de cliques (CTR)
+  const valorCTR = document.getElementById('valorCTR');
+  const barraCTR = document.getElementById('barraCTR');
+  const descricaoCTR = document.getElementById('descricaoCTR');
+
+  if (valorCTR && barraCTR && descricaoCTR) {
+    if (resultadoVisitas.error || resultadoCliques.error) {
+      valorCTR.textContent = 'Indisponível';
+      barraCTR.style.width = '0%';
+      descricaoCTR.textContent = 'Não foi possível carregar os dados.';
+    } else {
+      const visitasTotal = resultadoVisitas.count ?? 0;
+      const cliquesTotal = resultadoCliques.count ?? 0;
+      const taxa = visitasTotal > 0
+        ? (cliquesTotal / visitasTotal) * 100
+        : 0;
+
+      valorCTR.textContent = taxa.toFixed(1).replace('.', ',') + '%';
+      barraCTR.style.width = Math.min(taxa, 100) + '%';
+      descricaoCTR.textContent =
+        taxa.toFixed(1).replace('.', ',') +
+        ' cliques a cada 100 visitas';
+    }
+  }
+
     // Estatísticas por período
     const agora = new Date();
     const inicioHoje = new Date(agora);
