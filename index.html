@@ -260,27 +260,22 @@ loadMetaPixel(META_PIXEL_ID);
   const threeSixtyDays = new Date(now);
   threeSixtyDays.setDate(threeSixtyDays.getDate() - 360);
 
-  const periods = [
-    ['visitsToday', today],
-    ['visits7Days', sevenDays],
-    ['visits360Days', threeSixtyDays]
-  ];
+  
+  
+const { data, error } = await supabaseClient.rpc('get_visit_stats');
 
-  for (const [elementId, startDate] of periods) {
-    const { count, error } = await supabaseClient
-      .from('site_visits')
-      .select('id', { count: 'exact', head: true })
-      .gte('created_at', startDate.toISOString());
-
-    if (error) {
-      console.error('Erro ao consultar visitas:', error);
-      $(elementId).textContent = 'Erro';
-      continue;
-    }
-
-    $(elementId).textContent = count ?? 0;
-  }
+if (error) {
+  console.error('Erro ao consultar visitas:', error);
+  ['visitsToday', 'visits7Days', 'visits360Days'].forEach(id => {
+    $(id).textContent = 'Erro';
+  });
+} else {
+  const stats = data?.[0];
+  $('visitsToday').textContent = stats?.hoje ?? 0;
+  $('visits7Days').textContent = stats?.sete_dias ?? 0;
+  $('visits360Days').textContent = stats?.trezentos_sessenta_dias ?? 0;
 }
+
 
     $('joinButton').addEventListener('click', e => {
     const cfg = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
